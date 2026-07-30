@@ -9,7 +9,7 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #fafafa; /* 요청하신 전체 배경색 */
+            background-color: #fafafa;
         }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .portfolio-card { transition: all 0.3s ease; height: 500px; }
@@ -50,7 +50,6 @@
             </div>
         </div>
 
-        <!-- 카테고리 렌더링 컨테이너 -->
         <div id="category-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- 자바스크립트를 통해 렌더링됩니다 -->
         </div>
@@ -105,16 +104,25 @@
     <script>
         const CATEGORIES = ['상세페이지', '패키지', '프로모션 디자인', 'AI목업', '기타'];
         
-        // 오류를 수정하여 안전하게 로컬 스토리지 데이터를 가져옵니다.
-        let portfolioData = {};
+        // 초기 기본 데이터 설정 (프로모션 디자인 추가됨)
+        let defaultData = {
+            '프로모션 디자인': [
+                { image: './images/work1.jpg', title: '스마트스토어 모바일페이지', topic: '안전망 사다리', duration: '2일' },
+                { image: './images/work2.jpg', title: '스토어 모바일배너', topic: '대문자바라', duration: '1일' }
+            ]
+        };
+
+        let portfolioData = defaultData;
+
         try {
             const storedData = localStorage.getItem('portfolioData');
             if (storedData) {
+                // 기존에 저장된 데이터가 있다면 그 데이터를 우선 사용합니다.
                 portfolioData = JSON.parse(storedData);
             }
         } catch (error) {
             console.error("데이터를 불러오는 중 오류 발생:", error);
-            portfolioData = {};
+            portfolioData = defaultData;
         }
 
         // 카테고리가 비어있으면 초기화
@@ -139,7 +147,6 @@
                 const card = document.createElement('div');
                 card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-200 portfolio-card flex flex-col';
                 
-                // 요청하신 업로드 버튼 컬러 적용: bg-[#7719aa]
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-4 border-b pb-3">
                         <h3 class="font-bold text-lg">${cat} <span class="text-gray-400 font-normal">(${items.length})</span></h3>
@@ -198,14 +205,13 @@
                     
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
                     
-                    // 임시 변수에 저장 후 정보 입력 모달 띄우기
                     tempUploadData = { category: category, imageSrc: dataUrl };
                     openInfoModal();
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            event.target.value = ''; // 입력 필드 초기화
+            event.target.value = ''; 
         }
 
         function openInfoModal() {
@@ -284,7 +290,6 @@
                     const importedData = JSON.parse(e.target.result);
                     portfolioData = importedData;
                     
-                    // 빈 카테고리 보정
                     CATEGORIES.forEach(cat => {
                         if (!portfolioData[cat]) portfolioData[cat] = [];
                     });
@@ -296,7 +301,7 @@
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // 초기화
+            event.target.value = ''; 
         }
 
         function openModal(cat) {
