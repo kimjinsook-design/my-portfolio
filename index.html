@@ -102,9 +102,8 @@
         let defaultData = {
             '프로모션 디자인': [
                 { image: './images/work1.jpg', title: '스마트스토어 모바일페이지', topic: '안전망 사다리', duration: '2일' },
-                { image: './images/work2.jpg', title: '스토어 모바일배너', topic: '대문자바라', duration: '1일' }
+                { image: './images/work2.jpg', title: '스토어 모바일배너', topic: '대문자바라', duration: '1일' },
                 { image: './images/work3.jpg', title: '네이버_행사배너', topic: '가구_네이버', duration: '2025년' }
-
             ]
         };
 
@@ -153,7 +152,7 @@
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition z-10 flex items-center justify-center">
                                         <span class="text-white opacity-0 group-hover:opacity-100 drop-shadow-md font-bold text-sm bg-black bg-opacity-50 px-3 py-1 rounded-full">자세히 보기</span>
                                     </div>
-                                    <img src="${item.image}" class="w-full h-auto block relative z-0">
+                                    <img src="${item.image}" class="w-full h-auto block relative z-0" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
                                 </div>
                                 <div class="px-1">
                                     <div class="text-sm font-bold truncate text-gray-800">${item.title || '제목 없음'}</div>
@@ -226,7 +225,6 @@
                     duration: duration
                 });
                 renderDashboard();
-                closeInfoManager = null;
                 closeInfoModal();
             }
         }
@@ -247,7 +245,7 @@
         }
 
         function clearAllData() {
-            if (confirm('모든 데이터를 초기화하시겠습니까?')) {
+            if (confirm('모든 데이터를 초기화하시겠습니까? (기본 데이터로 되돌아갑니다)')) {
                 localStorage.removeItem('portfolioData');
                 portfolioData = JSON.parse(JSON.stringify(defaultData));
                 renderDashboard();
@@ -300,7 +298,7 @@
                             <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition z-10 flex items-center justify-center">
                                 <span class="text-white opacity-0 group-hover:opacity-100 drop-shadow-md font-bold text-lg bg-black bg-opacity-60 px-4 py-2 rounded-full">원본 크기로 보기</span>
                             </div>
-                            <img src="${item.image}" class="w-full h-auto block relative z-0" />
+                            <img src="${item.image}" class="w-full h-auto block relative z-0" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'" />
                         </div>
                         <div class="w-full md:w-1/2">
                             <h4 class="text-2xl font-bold mb-4 text-gray-800 pb-2 border-b">${item.title}</h4>
@@ -324,6 +322,7 @@
         }
 
         function closeFullImage() {
+            document.getElementById('full-image-modal').classList.hidden = true;
             document.getElementById('full-image-modal').classList.add('hidden');
             document.getElementById('full-size-img').src = '';
         }
