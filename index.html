@@ -107,16 +107,31 @@
             ]
         };
 
-        let portfolioData = defaultData;
+        let portfolioData = JSON.parse(JSON.stringify(defaultData));
 
         try {
             const storedData = localStorage.getItem('portfolioData');
             if (storedData) {
-                portfolioData = JSON.parse(storedData);
+                const parsedStored = JSON.parse(storedData);
+                portfolioData = parsedStored;
+
+                // [스마트 동기화] defaultData에 추가된 이미지가 로컬스토리지에 없으면 자동 합치기
+                Object.keys(defaultData).forEach(cat => {
+                    if (!portfolioData[cat]) {
+                        portfolioData[cat] = [...defaultData[cat]];
+                    } else {
+                        defaultData[cat].forEach(defaultItem => {
+                            const exists = portfolioData[cat].some(item => item.image === defaultItem.image);
+                            if (!exists) {
+                                portfolioData[cat].push(defaultItem);
+                            }
+                        });
+                    }
+                });
             }
         } catch (error) {
             console.error("데이터 로딩 오류:", error);
-            portfolioData = defaultData;
+            portfolioData = JSON.parse(JSON.stringify(defaultData));
         }
 
         CATEGORIES.forEach(cat => {
@@ -322,7 +337,6 @@
         }
 
         function closeFullImage() {
-            document.getElementById('full-image-modal').classList.hidden = true;
             document.getElementById('full-image-modal').classList.add('hidden');
             document.getElementById('full-size-img').src = '';
         }
