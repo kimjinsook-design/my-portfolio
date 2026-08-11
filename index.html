@@ -23,16 +23,8 @@
 <body class="text-gray-900 min-h-screen flex flex-col">
 
     <header class="bg-white shadow-sm sticky top-0 z-40">
-        <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-tight">KIM JIN SOOK PORTFOLIO</h1>
-            <div class="flex gap-2 text-sm">
-                <button onclick="exportData()" class="px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-100 font-semibold shadow-sm">데이터 내보내기</button>
-                <label class="px-3 py-1.5 border border-gray-300 rounded hover:bg-gray-100 font-semibold shadow-sm cursor-pointer">
-                    데이터 가져오기
-                    <input type="file" accept=".json" class="hidden" onchange="importData(event)">
-                </label>
-                <button onclick="clearAllData()" class="px-3 py-1.5 border border-red-200 text-red-600 rounded hover:bg-red-50 font-semibold shadow-sm">전체 초기화</button>
-            </div>
         </div>
     </header>
 
@@ -49,36 +41,6 @@
             <!-- 자바스크립트를 통해 렌더링됩니다 -->
         </div>
     </main>
-
-    <!-- 정보 입력 모달 -->
-    <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
-            <h3 class="font-bold text-xl mb-4">작업물 정보 입력</h3>
-            <p class="text-sm text-gray-500 mb-4">선택하신 디자인의 상세 정보를 입력해주세요.</p>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">작업물 제목</label>
-                    <input type="text" id="info-title" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 봄 시즌 프로모션 배너">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">주제</label>
-                    <input type="text" id="info-topic" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 화장품 할인 이벤트">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">작업년도</label>
-                    <input type="text" id="info-year" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 2026년 7월">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">제작 기간</label>
-                    <input type="text" id="info-duration" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 2일">
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <button onclick="closeInfoModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300">취소</button>
-                <button onclick="saveNewItem()" class="px-4 py-2 bg-[#7719aa] text-white rounded-lg font-semibold hover:opacity-90">업로드 완료</button>
-            </div>
-        </div>
-    </div>
 
     <!-- 카테고리별 전체 모달 -->
     <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-80 z-40 hidden flex items-center justify-center p-4">
@@ -122,7 +84,7 @@
     <script>
         const CATEGORIES = ['상세페이지', '패키지', '프로모션 디자인', 'AI목업', '기타'];
         
-        let defaultData = {
+        let portfolioData = {
             '상세페이지': [
                 { image: './images/work12.jpg', title: '과일 가득 담은 꿀 3종 상세페이지', topic: '과일 가득 담은 꿀 3종 상세페이지 (상세디자인)', year: '2026년', duration: '1일' },
                 { image: './images/work11.jpg', title: '보루네오 편백나무침대 신제품 상세페이지', topic: '보루네오 편백나무침대 신제품 상세페이지 (상세디자인)', year: '2025년', duration: '3~5일' },
@@ -145,37 +107,9 @@
             ]
         };
 
-        let portfolioData = JSON.parse(JSON.stringify(defaultData));
-
-        try {
-            const storedData = localStorage.getItem('portfolioData');
-            if (storedData) {
-                const parsedStored = JSON.parse(storedData);
-                portfolioData = parsedStored;
-
-                Object.keys(defaultData).forEach(cat => {
-                    if (!portfolioData[cat]) {
-                        portfolioData[cat] = [...defaultData[cat]];
-                    } else {
-                        defaultData[cat].forEach(defaultItem => {
-                            const exists = portfolioData[cat].some(item => item.image === defaultItem.image);
-                            if (!exists) {
-                                portfolioData[cat].push(defaultItem);
-                            }
-                        });
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("데이터 로딩 오류:", error);
-            portfolioData = JSON.parse(JSON.stringify(defaultData));
-        }
-
         CATEGORIES.forEach(cat => {
             if (!portfolioData[cat]) portfolioData[cat] = [];
         });
-
-        let tempUploadData = { category: '', imageSrc: '' };
 
         // 작업년도/월 내림차순(최신순) 정렬 계산 함수
         function getYearScore(item) {
@@ -199,7 +133,6 @@
             CATEGORIES.forEach(cat => {
                 // 작업년도 기준 내림차순(최신순) 자동 정렬
                 const items = (portfolioData[cat] || []).sort((a, b) => getYearScore(b) - getYearScore(a));
-                portfolioData[cat] = items;
 
                 const card = document.createElement('div');
                 card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-200 portfolio-card flex flex-col';
@@ -207,17 +140,11 @@
                 card.innerHTML = `
                     <div class="flex justify-between items-center mb-4 border-b pb-3">
                         <h3 class="font-bold text-lg">${cat} <span class="text-gray-400 font-normal">(${items.length})</span></h3>
-                        <label class="cursor-pointer bg-[#7719aa] text-white px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition">
-                            업로드
-                            <input type="file" accept="image/*" class="hidden" onchange="handleFileUpload(event, '${cat}')">
-                        </label>
                     </div>
                     <div class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                        ${items.length === 0 ? `<div class="h-full flex items-center justify-center text-gray-400 text-sm">업로드된 이미지가 없습니다.</div>` : ''}
-                        ${items.map((item, idx) => `
+                        ${items.length === 0 ? `<div class="h-full flex items-center justify-center text-gray-400 text-sm">등록된 이미지가 없습니다.</div>` : ''}
+                        ${items.map((item) => `
                             <div class="border rounded-xl p-3 hover:bg-gray-50 transition group bg-white shadow-sm relative">
-                                <button onclick="deleteItem('${cat}', ${idx})" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full opacity-0 group-hover:opacity-100 transition z-20 shadow text-xs font-bold flex items-center justify-center">X</button>
-                                
                                 <div class="max-h-48 overflow-y-auto custom-scrollbar rounded-lg border border-gray-100 mb-2 bg-gray-50 cursor-pointer relative" onclick="openModal('${cat}')">
                                     <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition z-10 flex items-center justify-center">
                                         <span class="text-white opacity-0 group-hover:opacity-100 drop-shadow-md font-bold text-sm bg-black bg-opacity-50 px-3 py-1 rounded-full">자세히 보기</span>
@@ -234,126 +161,6 @@
                 `;
                 container.appendChild(card);
             });
-            saveData();
-        }
-
-        function handleFileUpload(event, category) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-                    const MAX_WIDTH = 1200;
-
-                    if (width > MAX_WIDTH) {
-                        height = Math.round((height * MAX_WIDTH) / width);
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                    tempUploadData = { category: category, imageSrc: dataUrl };
-                    openInfoModal();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-            event.target.value = ''; 
-        }
-
-        function openInfoModal() {
-            document.getElementById('info-title').value = '';
-            document.getElementById('info-topic').value = '';
-            document.getElementById('info-year').value = '';
-            document.getElementById('info-duration').value = '';
-            document.getElementById('info-modal').classList.remove('hidden');
-        }
-
-        function closeInfoModal() {
-            document.getElementById('info-modal').classList.add('hidden');
-            tempUploadData = { category: '', imageSrc: '' };
-        }
-
-        function saveNewItem() {
-            const title = document.getElementById('info-title').value.trim() || '제목 없음';
-            const topic = document.getElementById('info-topic').value.trim() || '-';
-            const year = document.getElementById('info-year').value.trim() || '';
-            const duration = document.getElementById('info-duration').value.trim() || '-';
-
-            if (tempUploadData.category && tempUploadData.imageSrc) {
-                portfolioData[tempUploadData.category].push({
-                    image: tempUploadData.imageSrc,
-                    title: title,
-                    topic: topic,
-                    year: year,
-                    duration: duration
-                });
-                renderDashboard();
-                closeInfoModal();
-            }
-        }
-
-        function deleteItem(category, index) {
-            if (confirm('이 이미지를 삭제하시겠습니까?')) {
-                portfolioData[category].splice(index, 1);
-                renderDashboard();
-            }
-        }
-
-        function saveData() {
-            try {
-                localStorage.setItem('portfolioData', JSON.stringify(portfolioData));
-            } catch (e) {
-                alert('저장 공간이 부족합니다.');
-            }
-        }
-
-        function clearAllData() {
-            if (confirm('모든 데이터를 초기화하시겠습니까? (기본 데이터로 되돌아갑니다)')) {
-                localStorage.removeItem('portfolioData');
-                portfolioData = JSON.parse(JSON.stringify(defaultData));
-                renderDashboard();
-            }
-        }
-
-        function exportData() {
-            const dataStr = JSON.stringify(portfolioData);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'portfolio_data_export.json';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    portfolioData = JSON.parse(e.target.result);
-                    CATEGORIES.forEach(cat => { if (!portfolioData[cat]) portfolioData[cat] = []; });
-                    renderDashboard();
-                    alert('성공적으로 불러왔습니다!');
-                } catch (error) {
-                    alert('올바른 파일 형식이 아닙니다.');
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = ''; 
         }
 
         function openModal(cat) {
@@ -493,7 +300,6 @@
                     closeFullImage();
                 } else {
                     closeModal();
-                    closeInfoModal();
                 }
             }
         });
