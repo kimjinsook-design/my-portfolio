@@ -50,7 +50,7 @@
         </div>
     </main>
 
-    <!-- 정보 입력 모달 -->
+    <!-- 정보 입력 모달 (작업년도 입력창 추가) -->
     <div id="info-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl">
             <h3 class="font-bold text-xl mb-4">작업물 정보 입력</h3>
@@ -65,8 +65,12 @@
                     <input type="text" id="info-topic" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 화장품 할인 이벤트">
                 </div>
                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">작업년도</label>
+                    <input type="text" id="info-year" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 2026년 7월">
+                </div>
+                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">제작 기간</label>
-                    <input type="text" id="info-duration" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 2023.03.01 ~ 2023.03.05">
+                    <input type="text" id="info-duration" class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7719aa]" placeholder="예: 2일">
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
@@ -120,16 +124,16 @@
         
         let defaultData = {
             '프로모션 디자인': [
-                { image: './images/work1.jpg', title: '스마트스토어 모바일페이지', topic: '안전망 사다리', duration: '2일' },
-                { image: './images/work2.jpg', title: '스토어 모바일배너', topic: '대문자바라', duration: '1일' },
-                { image: './images/work3.jpg', title: '네이버_행사배너', topic: '가구_네이버', duration: '2025년' }
+                { image: './images/work1.jpg', title: '스마트스토어 모바일페이지', topic: '안전망 사다리', year: '2026년', duration: '2일' },
+                { image: './images/work2.jpg', title: '스토어 모바일배너', topic: '대문자바라', year: '2026년', duration: '1일' },
+                { image: './images/work3.jpg', title: '네이버_행사배너', topic: '가구_네이버', year: '2025년', duration: '2025년' }
             ],
             '패키지': [
-                { image: './images/work6.jpg', title: '본헤나 보태니컬/티트리 샴푸 단상자 패키지', topic: '전체사용 (일본 매장용) / 2024년 2월', duration: '1일' },
-                { image: './images/work5.jpg', title: '과일 가득 담은 꿀 단상자 패키지', topic: '50대이상 오프라인 (매장용) / 2026년 7월', duration: '2일' }
+                { image: './images/work5.jpg', title: '과일 가득 담은 꿀 단상자 패키지', topic: '50대이상 오프라인 (매장용)', year: '2026년 7월', duration: '2일' },
+                { image: './images/work6.jpg', title: '본헤나 보태니컬/티트리 샴푸 단상자 패키지', topic: '전체사용 (일본 매장용)', year: '2024년 2월', duration: '1일' }
             ],
             'AI목업': [
-                { image: './images/work4.jpg', title: '과일 가득 담은 꿀 선물세트 AI 목업', topic: '과일 가득 담은 꿀 패키지 AI 렌더링', duration: '1시간' }
+                { image: './images/work4.jpg', title: '과일 가득 담은 꿀 선물세트 AI 목업', topic: '과일 가득 담은 꿀 패키지 AI 렌더링', year: '2026년', duration: '1시간' }
             ]
         };
 
@@ -165,12 +169,30 @@
 
         let tempUploadData = { category: '', imageSrc: '' };
 
+        // 작업년도/월 내림차순(최신순) 정렬 계산 함수
+        function getYearScore(item) {
+            const text = `${item.year || ''} ${item.topic || ''} ${item.duration || ''} ${item.title || ''}`;
+            const yearMatch = text.match(/(20\d{2})/);
+            let year = yearMatch ? parseInt(yearMatch[1]) : 0;
+            
+            let month = 0;
+            const monthMatch = text.match(/(20\d{2})\s*년?\s*(\d{1,2})\s*월?/);
+            if (monthMatch) {
+                month = parseInt(monthMatch[2]);
+            }
+            
+            return year * 100 + month;
+        }
+
         function renderDashboard() {
             const container = document.getElementById('category-container');
             container.innerHTML = '';
             
             CATEGORIES.forEach(cat => {
-                const items = portfolioData[cat] || [];
+                // 작업년도 기준 내림차순(최신순) 자동 정렬
+                const items = (portfolioData[cat] || []).sort((a, b) => getYearScore(b) - getYearScore(a));
+                portfolioData[cat] = items;
+
                 const card = document.createElement('div');
                 card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-gray-200 portfolio-card flex flex-col';
                 
@@ -196,7 +218,7 @@
                                 </div>
                                 <div class="px-1">
                                     <div class="text-sm font-bold truncate text-gray-800">${item.title || '제목 없음'}</div>
-                                    <div class="text-xs text-gray-500 mt-1">${item.topic || '주제 미상'} | ${item.duration || '기간 미상'}</div>
+                                    <div class="text-xs text-gray-500 mt-1">${item.topic || '주제 미상'} ${item.year ? '| ' + item.year : ''} | ${item.duration || '기간 미상'}</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -243,6 +265,7 @@
         function openInfoModal() {
             document.getElementById('info-title').value = '';
             document.getElementById('info-topic').value = '';
+            document.getElementById('info-year').value = '';
             document.getElementById('info-duration').value = '';
             document.getElementById('info-modal').classList.remove('hidden');
         }
@@ -255,13 +278,15 @@
         function saveNewItem() {
             const title = document.getElementById('info-title').value.trim() || '제목 없음';
             const topic = document.getElementById('info-topic').value.trim() || '-';
+            const year = document.getElementById('info-year').value.trim() || '';
             const duration = document.getElementById('info-duration').value.trim() || '-';
 
             if (tempUploadData.category && tempUploadData.imageSrc) {
-                portfolioData[tempUploadData.category].unshift({
+                portfolioData[tempUploadData.category].push({
                     image: tempUploadData.imageSrc,
                     title: title,
                     topic: topic,
+                    year: year,
                     duration: duration
                 });
                 renderDashboard();
@@ -344,6 +369,7 @@
                             <h4 class="text-2xl font-bold mb-4 text-gray-800 pb-2 border-b">${item.title}</h4>
                             <div class="space-y-3">
                                 <p class="text-gray-700 flex items-center"><span class="w-20 font-semibold text-gray-500">주제</span> ${item.topic}</p>
+                                <p class="text-gray-700 flex items-center"><span class="w-20 font-semibold text-gray-500">작업년도</span> ${item.year || '-'}</p>
                                 <p class="text-gray-700 flex items-center"><span class="w-20 font-semibold text-gray-500">제작기간</span> ${item.duration}</p>
                             </div>
                         </div>
