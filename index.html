@@ -18,6 +18,40 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+        /* --- PDF 내보내기 / 인쇄 전용 최적화 CSS --- */
+        @media print {
+            .no-print, header button, #full-image-modal, #image-modal {
+                display: none !important;
+            }
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            #category-container {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 20px !important;
+            }
+            .portfolio-card {
+                height: auto !important;
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            .overflow-y-auto, .max-h-48 {
+                overflow: visible !important;
+                max-height: none !important;
+            }
+            ::-webkit-scrollbar {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body class="text-gray-900 min-h-screen flex flex-col">
@@ -25,6 +59,11 @@
     <header class="bg-white shadow-sm sticky top-0 z-40">
         <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-tight">KIM JIN SOOK PORTFOLIO</h1>
+            <!-- PDF 내보내기 버튼 추가 -->
+            <button onclick="window.print()" class="px-3.5 py-1.5 bg-[#7719aa] text-white rounded-lg text-sm font-semibold shadow-sm hover:opacity-90 transition flex items-center gap-1.5 no-print">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                PDF 내보내기
+            </button>
         </div>
     </header>
 
@@ -146,7 +185,7 @@
                         ${items.map((item) => `
                             <div class="border rounded-xl p-3 hover:bg-gray-50 transition group bg-white shadow-sm relative">
                                 <div class="max-h-48 overflow-y-auto custom-scrollbar rounded-lg border border-gray-100 mb-2 bg-gray-50 cursor-pointer relative" onclick="openModal('${cat}')">
-                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition z-10 flex items-center justify-center">
+                                    <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition z-10 flex items-center justify-center no-print">
                                         <span class="text-white opacity-0 group-hover:opacity-100 drop-shadow-md font-bold text-sm bg-black bg-opacity-50 px-3 py-1 rounded-full">자세히 보기</span>
                                     </div>
                                     <img src="${item.image}" class="w-full h-auto block relative z-0" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Not+Found'">
@@ -197,7 +236,7 @@
         function closeModal() { document.getElementById('image-modal').classList.add('hidden'); }
 
         /* --- PC & 모바일 반응형 확대/축소 핵심 최적화 로직 --- */
-        let currentZoom = 1; // 1 = 화면 맞춤
+        let currentZoom = 1;
         const MIN_ZOOM = 0.5;
         const MAX_ZOOM = 3.0;
         const ZOOM_STEP = 0.25;
@@ -229,14 +268,12 @@
             const container = document.getElementById('full-img-container');
 
             if (currentZoom === 1) {
-                // 화면 맞춤 상태
                 img.style.transform = 'none';
                 img.style.transformOrigin = 'center center';
                 img.className = 'max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-200 ease-out cursor-zoom-in my-auto mx-auto block';
                 container.className = 'w-full flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-2 sm:p-6';
                 zoomText.innerText = '화면맞춤';
             } else {
-                // 확대 / 축소 상태
                 img.style.transform = `scale(${currentZoom})`;
                 img.style.transformOrigin = 'top center';
                 img.className = 'transition-transform duration-200 ease-out rounded-lg shadow-2xl cursor-zoom-out my-8 mx-auto block max-w-none';
@@ -272,14 +309,13 @@
         function toggleZoomImage(event) {
             event.stopPropagation();
             if (currentZoom === 1) {
-                currentZoom = 1.75; // 클릭/터치 시 175%로 확대
+                currentZoom = 1.75;
             } else {
-                currentZoom = 1;    // 다시 클릭/터치 시 화면 맞춤
+                currentZoom = 1;
             }
             applyZoom();
         }
 
-        // PC 마우스 휠로 확대/축소 조작
         document.getElementById('full-img-container').addEventListener('wheel', function(e) {
             const fullModal = document.getElementById('full-image-modal');
             if (fullModal.classList.contains('hidden')) return;
@@ -292,7 +328,6 @@
             }
         }, { passive: false });
 
-        // 키보드 Esc 키로 모달 닫기
         window.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const fullModal = document.getElementById('full-image-modal');
