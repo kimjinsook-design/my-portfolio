@@ -89,27 +89,29 @@
         </div>
     </div>
 
-    <!-- 모바일 최적화 원본/확대 모달 -->
-    <div id="full-image-modal" class="fixed inset-0 bg-black/90 z-[60] hidden flex flex-col items-center justify-between select-none">
-        <!-- 상단 조작바 -->
-        <div class="w-full p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/80 via-black/40 to-transparent">
-            <div class="flex items-center gap-1.5 text-white text-xs sm:text-sm bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-lg">
-                <button onclick="zoomOutImage()" class="px-2.5 py-1 hover:bg-white/20 active:bg-white/30 rounded font-bold transition">-</button>
-                <span id="zoom-level-text" class="px-1 min-w-[60px] text-center font-semibold text-gray-200">화면맞춤</span>
-                <button onclick="zoomInImage()" class="px-2.5 py-1 hover:bg-white/20 active:bg-white/30 rounded font-bold transition">+</button>
-                <button onclick="resetZoomImage()" class="ml-1 px-2.5 py-1 bg-white/20 hover:bg-white/30 active:bg-white/40 rounded text-xs transition">맞춤</button>
+    <!-- PC 및 모바일 최적화 원본/확대 모달 -->
+    <div id="full-image-modal" class="fixed inset-0 bg-black/95 z-[60] hidden flex flex-col items-center justify-between select-none">
+        <!-- 상단 고정 조작바 -->
+        <div class="w-full p-3 sm:p-4 flex justify-between items-center z-10 bg-gradient-to-b from-black/90 via-black/50 to-transparent shrink-0">
+            <div class="flex items-center gap-1 sm:gap-2 text-white text-xs sm:text-sm bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 shadow-xl">
+                <button onclick="zoomOutImage()" class="px-2.5 py-1 hover:bg-white/20 active:bg-white/30 rounded font-bold transition text-base" title="축소">-</button>
+                <span id="zoom-level-text" class="px-1.5 min-w-[65px] text-center font-semibold text-gray-200">화면맞춤</span>
+                <button onclick="zoomInImage()" class="px-2.5 py-1 hover:bg-white/20 active:bg-white/30 rounded font-bold transition text-base" title="확대">+</button>
+                <div class="w-[1px] h-4 bg-white/30 mx-0.5"></div>
+                <button onclick="setZoomImage(1.0)" class="px-2 py-1 hover:bg-white/20 active:bg-white/30 rounded text-xs transition">100%</button>
+                <button onclick="resetZoomImage()" class="px-2 py-1 bg-white/20 hover:bg-white/30 active:bg-white/40 rounded text-xs transition font-medium">맞춤</button>
             </div>
-            <button onclick="closeFullImage()" class="text-white text-2xl font-bold bg-black/60 hover:bg-black/90 rounded-full w-10 h-10 flex items-center justify-center transition border border-white/20 shadow-lg">&times;</button>
+            <button onclick="closeFullImage()" class="text-white text-2xl font-bold bg-black/70 hover:bg-black rounded-full w-10 h-10 flex items-center justify-center transition border border-white/20 shadow-xl">&times;</button>
         </div>
 
         <!-- 이미지 컨테이너 -->
-        <div id="full-img-container" class="w-full flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-2 sm:p-4">
-            <img id="full-size-img" src="" class="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl transition-transform duration-200 ease-out cursor-pointer" onclick="toggleZoomImage(event)">
+        <div id="full-img-container" class="w-full flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-2 sm:p-6">
+            <img id="full-size-img" src="" class="max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-200 ease-out cursor-zoom-in my-auto block" onclick="toggleZoomImage(event)">
         </div>
         
         <!-- 하단 안내 문구 -->
-        <div class="p-3 text-white/70 text-xs text-center z-10 bg-gradient-to-t from-black/80 via-black/40 to-transparent w-full">
-            💡 이미지를 터치(클릭)하거나 상단 버튼으로 확대/축소할 수 있습니다.
+        <div class="p-2 sm:p-3 text-white/70 text-xs text-center z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent w-full shrink-0">
+            💡 이미지 클릭/터치, 상단 버튼, 또는 PC 마우스 휠로 자유롭게 확대/축소할 수 있습니다. (Esc: 닫기)
         </div>
     </div>
 
@@ -215,7 +217,7 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-                    const MAX_WIDTH = 1000;
+                    const MAX_WIDTH = 1200;
 
                     if (width > MAX_WIDTH) {
                         height = Math.round((height * MAX_WIDTH) / width);
@@ -227,7 +229,7 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                     tempUploadData = { category: category, imageSrc: dataUrl };
                     openInfoModal();
                 };
@@ -352,8 +354,8 @@
 
         function closeModal() { document.getElementById('image-modal').classList.add('hidden'); }
 
-        /* --- 모바일 최적화 확대/축소 로직 --- */
-        let currentZoom = 1;
+        /* --- PC & 모바일 반응형 확대/축소 핵심 최적화 로직 --- */
+        let currentZoom = 1; // 1 = 화면 맞춤
         const MIN_ZOOM = 0.5;
         const MAX_ZOOM = 3.0;
         const ZOOM_STEP = 0.25;
@@ -385,30 +387,39 @@
             const container = document.getElementById('full-img-container');
 
             if (currentZoom === 1) {
+                // 화면 맞춤 상태
                 img.style.transform = 'none';
-                img.className = 'max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl transition-transform duration-200 ease-out cursor-pointer';
-                container.className = 'w-full flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-2 sm:p-4';
+                img.style.transformOrigin = 'center center';
+                img.className = 'max-w-full max-h-[85vh] w-auto h-auto object-contain rounded-lg shadow-2xl transition-all duration-200 ease-out cursor-zoom-in my-auto mx-auto block';
+                container.className = 'w-full flex-1 overflow-auto custom-scrollbar flex items-center justify-center p-2 sm:p-6';
                 zoomText.innerText = '화면맞춤';
             } else {
+                // 확대 / 축소 상태
                 img.style.transform = `scale(${currentZoom})`;
-                img.className = 'max-w-none max-h-none transition-transform duration-200 ease-out rounded-lg shadow-2xl cursor-pointer my-8';
-                container.className = 'w-full flex-1 overflow-auto custom-scrollbar block p-4 text-center';
+                img.style.transformOrigin = 'top center';
+                img.className = 'transition-transform duration-200 ease-out rounded-lg shadow-2xl cursor-zoom-out my-8 mx-auto block max-w-none';
+                container.className = 'w-full flex-1 overflow-auto custom-scrollbar block p-4 sm:p-8 text-center';
                 zoomText.innerText = `${Math.round(currentZoom * 100)}%`;
             }
         }
 
         function zoomInImage() {
             if (currentZoom < MAX_ZOOM) {
-                currentZoom += ZOOM_STEP;
+                currentZoom = Math.min(MAX_ZOOM, currentZoom + ZOOM_STEP);
                 applyZoom();
             }
         }
 
         function zoomOutImage() {
             if (currentZoom > MIN_ZOOM) {
-                currentZoom -= ZOOM_STEP;
+                currentZoom = Math.max(MIN_ZOOM, currentZoom - ZOOM_STEP);
                 applyZoom();
             }
+        }
+
+        function setZoomImage(zoomValue) {
+            currentZoom = zoomValue;
+            applyZoom();
         }
 
         function resetZoomImage() {
@@ -419,12 +430,38 @@
         function toggleZoomImage(event) {
             event.stopPropagation();
             if (currentZoom === 1) {
-                currentZoom = 1.75;
+                currentZoom = 1.75; // 클릭/터치 시 175%로 확대
             } else {
-                currentZoom = 1;
+                currentZoom = 1;    // 다시 클릭/터치 시 화면 맞춤
             }
             applyZoom();
         }
+
+        // PC 마우스 휠로 확대/축소 조작
+        document.getElementById('full-img-container').addEventListener('wheel', function(e) {
+            const fullModal = document.getElementById('full-image-modal');
+            if (fullModal.classList.contains('hidden')) return;
+            
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomInImage();
+            } else {
+                zoomOutImage();
+            }
+        }, { passive: false });
+
+        // 키보드 Esc 키로 모달 닫기
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const fullModal = document.getElementById('full-image-modal');
+                if (!fullModal.classList.contains('hidden')) {
+                    closeFullImage();
+                } else {
+                    closeModal();
+                    closeInfoModal();
+                }
+            }
+        });
 
         window.onload = renderDashboard;
     </script>
