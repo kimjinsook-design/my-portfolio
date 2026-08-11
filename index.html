@@ -19,11 +19,11 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
 
-        /* --- PDF 내보내기 / 인쇄 완전 최적화 CSS --- */
+        /* --- PDF 내보내기 / 인쇄 정밀 최적화 CSS --- */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 12mm 12mm 15mm 12mm;
+                margin: 10mm;
             }
             .no-print, header button, #full-image-modal, #image-modal {
                 display: none !important;
@@ -39,7 +39,7 @@
             header {
                 position: static !important;
                 box-shadow: none !important;
-                border-bottom: 2px solid #111827 !important;
+                border-bottom: 2px solid #7719aa !important;
                 padding-bottom: 8px !important;
                 margin-bottom: 16px !important;
             }
@@ -49,14 +49,15 @@
                 margin: 0 !important;
             }
             #category-container {
-                display: block !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 20px !important;
             }
             .portfolio-card {
                 height: auto !important;
                 box-shadow: none !important;
-                border: 1px solid #d1d5db !important;
+                border: 1px solid #e5e7eb !important;
                 border-radius: 12px !important;
-                margin-bottom: 20px !important;
                 padding: 16px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
@@ -67,23 +68,12 @@
                 padding-bottom: 6px !important;
                 margin-bottom: 12px !important;
             }
-            .overflow-y-auto {
-                overflow: visible !important;
-                max-height: none !important;
-            }
-            /* 세로로 긴 상세페이지 이미지가 인쇄 레이아웃을 뚫는 현상 방지 */
-            .portfolio-card img {
-                max-height: 200px !important;
-                width: 100% !important;
-                object-fit: cover !important;
-                object-position: top !important;
-                border-radius: 6px !important;
-                border: 1px solid #e5e7eb !important;
-            }
             .portfolio-card .flex-1.overflow-y-auto {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
                 gap: 12px !important;
+                overflow: visible !important;
+                max-height: none !important;
             }
             .portfolio-card .border {
                 border: 1px solid #e5e7eb !important;
@@ -92,6 +82,24 @@
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 background-color: #f9fafb !important;
+            }
+            /* 썸네일 박스 및 이미지 전체비율 고정 */
+            .portfolio-card .max-h-48 {
+                max-height: none !important;
+                height: 200px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background-color: #f3f4f6 !important;
+                border-radius: 6px !important;
+                overflow: hidden !important;
+            }
+            .portfolio-card img {
+                max-height: 200px !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important;
+                object-position: center !important;
             }
             ::-webkit-scrollbar {
                 display: none !important;
